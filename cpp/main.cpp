@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -330,22 +329,3 @@ public:
         }
     }
 };
-
-int main()
-{
-    Board board("8/8/8/4k3/8/2R1K3/4P3/8 b - - 0 1");
-    board.generatePseudoLegalMoves(PieceColour::Black);
-
-    for (int r = 7; r >= 0; r--)
-    {
-        for (int c = 0; c < 8; c++)
-        {
-            int i = r * 8 + c;
-            if (board.pieces[i].colour == PieceColour::White) cout << "W ";
-            else if (board.pieces[i].colour == PieceColour::Black) cout << "B ";
-            else cout << "☐ ";
-        }
-
-        cout << "\n";
-    }
-}
