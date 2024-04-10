@@ -103,7 +103,7 @@ public:
         return string(result.begin(), result.end()) + "KQkq - 0 1";
     }
 
-    void generatePseudoLegalMoves(bool isWhiteTurn)
+    void generatePseudoLegalMoves()
     {
         moves.clear();
 
@@ -112,67 +112,68 @@ public:
             if (pieces[i] == 0 || isWhiteTurn != isWhite(pieces[i])) continue;
             if (pieces[i] == 'k' || pieces[i] == 'K')
             {
-                if (i % 8 != 0 && (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[i - 1]))) moves.emplace_back(i, i - 1);
-                if (i % 8 != 0 && i / 8 != 7 && (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[i + 7]))) moves.emplace_back(i, i + 7);
-                if (i / 8 != 7 && (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[i + 8]))) moves.emplace_back(i, i + 8);
-                if (i / 8 != 7 && i % 8 != 7 && (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[i + 9]))) moves.emplace_back(i, i + 9);
-                if (i % 8 != 7 && (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[i + 1]))) moves.emplace_back(i, i + 1);
-                if (i % 8 != 7 && i / 8 != 0 && (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[i - 7]))) moves.emplace_back(i, i - 7);
-                if (i / 8 != 0 && (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[i - 8]))) moves.emplace_back(i, i - 8);
-                if (i / 8 != 0 && i % 8 != 0 && (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[i - 9]))) moves.emplace_back(i, i - 9);
+                if (i % 8 != 0 && (pieces[i - 1] == 0 || isWhite(pieces[i]) != isWhite(pieces[i - 1]))) moves.emplace_back(i, i - 1);
+                if (i % 8 != 0 && i / 8 != 7 && (pieces[i + 7] == 0 || isWhite(pieces[i]) != isWhite(pieces[i + 7]))) moves.emplace_back(i, i + 7);
+                if (i / 8 != 7 && (pieces[i + 8] == 0 || isWhite(pieces[i]) != isWhite(pieces[i + 8]))) moves.emplace_back(i, i + 8);
+                if (i / 8 != 7 && i % 8 != 7 && (pieces[i + 9] == 0 || isWhite(pieces[i]) != isWhite(pieces[i + 9]))) moves.emplace_back(i, i + 9);
+                if (i % 8 != 7 && (pieces[i + 1] == 0 || isWhite(pieces[i]) != isWhite(pieces[i + 1]))) moves.emplace_back(i, i + 1);
+                if (i % 8 != 7 && i / 8 != 0 && (pieces[i - 7] == 0 || isWhite(pieces[i]) != isWhite(pieces[i - 7]))) moves.emplace_back(i, i - 7);
+                if (i / 8 != 0 && (pieces[i - 8] == 0 || isWhite(pieces[i]) != isWhite(pieces[i - 8]))) moves.emplace_back(i, i - 8);
+                if (i / 8 != 0 && i % 8 != 0 && (pieces[i - 9] == 0 || isWhite(pieces[i]) != isWhite(pieces[i - 9]))) moves.emplace_back(i, i - 9);
             }
             if (pieces[i] == 'r' || pieces[i] == 'R' || pieces[i] == 'q' || pieces[i] == 'Q')
             {
-                for (int j = i + 1; j < (i / 8 + 1); j++)
+                for (int j = i + 1; j < (i / 8 + 1) * 8; j++)
                 {
-                    if (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
-                    if (pieces[i] != 0) break;
+                    if (pieces[j] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
+                    if (pieces[j] != 0) break;
                 }
                 for (int j = i - 1; j >= ((i / 8) * 8); j--)
                 {
-                    if (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
-                    if (pieces[i] != 0) break;
+                    if (pieces[j] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
+                    if (pieces[j] != 0) break;
                 }
                 for (int j = i + 8; j < 64; j += 8)
                 {
-                    if (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
-                    if (pieces[i] != 0) break;
+                    if (pieces[j] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
+                    if (pieces[j] != 0) break;
                 }
                 for (int j = i - 8; j >= 0; j -= 8)
                 {
-                    if (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
-                    if (pieces[i] != 0) break;
+                    if (pieces[j] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
+                    if (pieces[j] != 0) break;
                 }
             }
+
             if (pieces[i] == 'b' || pieces[i] == 'B' || pieces[i] == 'q' || pieces[i] == 'Q')
             {
                 int a = i / 8, b = i % 8;
                 while (a + 1 < 8 && b + 1 < 8)
                 {
                     int j = (++a) * 8 + (++b);
-                    if (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
-                    if (pieces[i] != 0) break;
+                    if (pieces[j] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
+                    if (pieces[j] != 0) break;
                 }
                 a = i / 8, b = i % 8;
                 while (a > 0 && b > 0)
                 {
                     int j = (--a) * 8 + (--b);
-                    if (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
-                    if (pieces[i] != 0) break;
+                    if (pieces[j] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
+                    if (pieces[j] != 0) break;
                 }
                 a = i / 8, b = i % 8;
                 while (a + 1 < 8 && b > 0)
                 {
                     int j = (++a) * 8 + (--b);
-                    if (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
-                    if (pieces[i] != 0) break;
+                    if (pieces[j] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
+                    if (pieces[j] != 0) break;
                 }
                 a = i / 8, b = i % 8;
                 while (a > 0 && b + 1 < 8)
                 {
                     int j = (--a) * 8 + (++b);
-                    if (pieces[i] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
-                    if (pieces[i] != 0) break;
+                    if (pieces[j] == 0 || isWhite(pieces[i]) != isWhite(pieces[j])) moves.emplace_back(i, j);
+                    if (pieces[j] != 0) break;
                 }
             }
             if (pieces[i] == 'n' || pieces[i] == 'N')
@@ -216,10 +217,36 @@ public:
             }
         }
     }
+
+    bool move(const pair<int, int> &move)
+    {
+        generatePseudoLegalMoves();
+        bool isValid = false;
+        for (pair<int, int> &potentialMove: moves)
+        {
+            if (potentialMove == move)
+            {
+                isValid = true;
+                break;
+            }
+        }
+        if (!isValid) return false;
+
+        pieces[move.second] = pieces[move.first];
+        pieces[move.first] = 0;
+        isWhiteTurn = !isWhiteTurn;
+        return true;
+    }
 };
 
 EMSCRIPTEN_BINDINGS(my_module)
 {
+    class_<pair<int, int>>("Pair")
+        .constructor()
+        .constructor<int, int>()
+        .property("first", &pair<int, int>::first)
+        .property("second", &pair<int, int>::second);
+
     register_vector<pair<int, int>>("PairList");
     
     class_<Board>("Board")
@@ -227,5 +254,6 @@ EMSCRIPTEN_BINDINGS(my_module)
         .constructor<string>()
         .property("moves", &Board::moves)
         .function("generatePseudoLegalMoves", &Board::generatePseudoLegalMoves)
-        .function("getAsFenString", &Board::getAsFenString);
+        .function("getAsFenString", &Board::getAsFenString)
+        .function("move", &Board::move);
 }

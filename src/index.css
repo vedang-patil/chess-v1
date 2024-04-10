@@ -1,40 +1,43 @@
 .board {
-    width: 800px;
+    width: 600px;
     display: grid;
-    order: -1;
     grid-template-rows: repeat(8, 1fr);
     grid-template-columns: repeat(8, 1fr);
 }
 
 .whiteSquare {
-    height: 100px;
-    width: 100px;
+    aspect-ratio: 1/1;
     background-color: #eed7bd;
+    padding: 10%;
+    border: 3px solid transparent;
 }
 
 .blackSquare {
-    height: 100px;
-    width: 100px;
+    aspect-ratio: 1/1;
     background-color: #a37556;
+    padding: 10%;
+    border: 3px solid transparent;
 }
 
 .piece {
     width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-size: contain;
+    touch-action: none;
 }
 
-.piece img {
-    width: 80%;
-    height: 80%;
+.piece:hover {
+    cursor: grab;
+}
+
+.piece:active {
+    cursor: grabbing;
 }
 
 .piece-white {
     filter: invert(100%);
 }
 
-.piece-black {
-    filter: invert(0%);
+.hoverSquare {
+    border: 3px solid white;
 }
