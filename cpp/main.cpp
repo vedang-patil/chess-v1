@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <unordered_map>
+#include <iostream>
 
 using namespace emscripten;
 using namespace std;
@@ -13,11 +14,32 @@ bool isWhite(char piece)
     return isupper(piece);
 }
 
+int coordToIndex(const string &square)
+{
+    int rank = (int)square[1] - 1;
+    int file = ((int)square[0] - 'a');
+    return rank * 8 + file;
+}
+
+string indexToCoord(int index)
+{
+    string result;
+    result += ('a' + index % 8);
+    result += ('1' + index / 8);
+    return result;
+}
+
 class Board
 {
 private:
     char pieces[64] = {};
     bool isWhiteTurn = true;
+    int enPassantTargetSquare = -1;
+    int halfMoveClock = 0;
+    int fullMoveCounter = 1;
+
+    bool canWhiteCastleKingside = true, canWhiteCastleQueenside = true;
+    bool canBlackCastleKingside = true, canBlackCastleQueenside = true;
 public:
     vector<pair<int, int>> moves;
 
@@ -36,8 +58,9 @@ public:
             end = (int)fenString.find(' ', start);
         }
 
-        int rank = 7, file = 0;
+        chunks.push_back(fenString.substr(start));
 
+        int rank = 7, file = 0;
         for (const char &c: chunks[0])
         {
             if (c == '/') continue;
@@ -56,6 +79,19 @@ public:
             rank -= file / 8;
             file %= 8;
         }
+
+        isWhiteTurn = (chunks[1] == "w");
+
+        canWhiteCastleKingside = (chunks[2].find('K') != string::npos);
+        canWhiteCastleQueenside = (chunks[2].find('Q') != string::npos);
+        canBlackCastleKingside = (chunks[2].find('k') != string::npos);
+        canBlackCastleQueenside = (chunks[2].find('q') != string::npos);
+
+        if (chunks[3] != "-") enPassantTargetSquare = coordToIndex(chunks[3]);
+        else enPassantTargetSquare = -1;
+
+        halfMoveClock = stoi(chunks[4]);
+        fullMoveCounter = stoi(chunks[5]);
     }
 
     string getAsFenString()
@@ -96,11 +132,31 @@ public:
         }
 
         result[result.size() - 1] = ' ';
+
         if (isWhiteTurn) result.push_back('w');
         else result.push_back('b');
+
         result.push_back(' ');
 
-        return string(result.begin(), result.end()) + "KQkq - 0 1";
+        if (canWhiteCastleKingside) result.push_back('K');
+        if (canWhiteCastleQueenside) result.push_back('Q');
+        if (canBlackCastleKingside) result.push_back('k');
+        if (canBlackCastleQueenside) result.push_back('q');
+
+        result.push_back(' ');
+
+        if (enPassantTargetSquare == -1) result.push_back('-');
+        else for (char c: indexToCoord(enPassantTargetSquare)) result.push_back(c);
+
+        result.push_back(' ');
+
+        for (char c: to_string(halfMoveClock)) result.push_back(c);
+
+        result.push_back(' ');
+
+        for (char c: to_string(fullMoveCounter)) result.push_back(c);
+
+        return string(result.begin(), result.end());
     }
 
     void generatePseudoLegalMoves()
@@ -232,9 +288,18 @@ public:
         }
         if (!isValid) return false;
 
+        if (!isWhite(pieces[move.first])) fullMoveCounter++;
+        halfMoveClock++;
+        if (pieces[move.second] != 0 || pieces[move.first] == 'p' || pieces[move.first] == 'P') halfMoveClock = 0;
+
+        if (pieces[move.first] == 'P' && move.second == move.first + 16) enPassantTargetSquare = move.second;
+        else if (pieces[move.first] == 'p' && move.second == move.first - 16) enPassantTargetSquare = move.second;
+        else enPassantTargetSquare = -1;
+
         pieces[move.second] = pieces[move.first];
         pieces[move.first] = 0;
         isWhiteTurn = !isWhiteTurn;
+
         return true;
     }
 };
