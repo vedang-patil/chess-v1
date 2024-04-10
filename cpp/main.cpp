@@ -263,6 +263,8 @@ public:
                 if (i / 8 == 1 && pieces[i + 8] == 0 && pieces[i + 16] == 0) moves.emplace_back(i, i + 16);
                 if (i + 7 < 64 && i % 8 != 0 && pieces[i + 7] != 0 && !isWhite(pieces[i + 7])) moves.emplace_back(i, i + 7);
                 if (i + 9 < 64 && i % 8 != 7  && pieces[i + 9] != 0 && !isWhite(pieces[i + 9])) moves.emplace_back(i, i + 9);
+                if (i % 8 != 0 && i - 1 == enPassantTargetSquare && !isWhite(pieces[enPassantTargetSquare])) moves.emplace_back(i, i + 7);
+                if (i % 8 != 7 && i + 1 == enPassantTargetSquare && !isWhite(pieces[enPassantTargetSquare])) moves.emplace_back(i, i + 9);
             }
             if (pieces[i] == 'p')
             {
@@ -270,6 +272,8 @@ public:
                 if (i / 8 == 6 && pieces[i - 8] == 0 && pieces[i - 16] == 0) moves.emplace_back(i, i - 16);
                 if (i - 7 >= 0 && i % 8 != 7 && pieces[i - 7] != 0 && isWhite(pieces[i - 7])) moves.emplace_back(i, i - 7);
                 if (i - 9 >= 0 && i % 8 != 0 && pieces[i - 9] != 0 && isWhite(pieces[i - 9])) moves.emplace_back(i, i - 9);
+                if (i % 8 != 0 && i - 1 == enPassantTargetSquare && isWhite(pieces[enPassantTargetSquare])) moves.emplace_back(i, i - 9);
+                if (i % 8 != 7 && i + 1 == enPassantTargetSquare && isWhite(pieces[enPassantTargetSquare])) moves.emplace_back(i, i - 7);
             }
         }
     }
@@ -292,9 +296,14 @@ public:
         halfMoveClock++;
         if (pieces[move.second] != 0 || pieces[move.first] == 'p' || pieces[move.first] == 'P') halfMoveClock = 0;
 
+        if (pieces[move.first] == 'P' && pieces[move.second] == 0 && (move.first + 7 == pieces[move.second] || move.first + 9 == move.second))
+            pieces[enPassantTargetSquare] = 0;
+        if (pieces[move.first] == 'p' && pieces[move.second] == 0 && (move.first - 7 == move.second || move.first - 9 == move.second))
+            pieces[enPassantTargetSquare] = 0;
+
+        enPassantTargetSquare = -1;
         if (pieces[move.first] == 'P' && move.second == move.first + 16) enPassantTargetSquare = move.second;
         else if (pieces[move.first] == 'p' && move.second == move.first - 16) enPassantTargetSquare = move.second;
-        else enPassantTargetSquare = -1;
 
         pieces[move.second] = pieces[move.first];
         pieces[move.first] = 0;
