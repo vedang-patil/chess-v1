@@ -166,6 +166,10 @@ public:
         for (int i = 0; i < 64; i++)
         {
             if (pieces[i] == 0 || isWhiteTurn != isWhite(pieces[i])) continue;
+            if (canWhiteCastleQueenside && pieces[1] == 0 && pieces[2] == 0 && pieces[3] == 0) moves.emplace_back(4, 2);
+            if (canWhiteCastleKingside && pieces[5] == 0 && pieces[6] == 0) moves.emplace_back(4, 6);
+            if (canBlackCastleQueenside && pieces[57] == 0 && pieces[58] == 0 && pieces[59] == 0) moves.emplace_back(60, 58);
+            if (canBlackCastleKingside && pieces[61] == 0 && pieces[62] == 0) moves.emplace_back(60, 62);
             if (pieces[i] == 'k' || pieces[i] == 'K')
             {
                 if (i % 8 != 0 && (pieces[i - 1] == 0 || isWhite(pieces[i]) != isWhite(pieces[i - 1]))) moves.emplace_back(i, i - 1);
@@ -281,34 +285,52 @@ public:
     bool move(const pair<int, int> &move)
     {
         generatePseudoLegalMoves();
-        bool isValid = false;
-        for (pair<int, int> &potentialMove: moves)
-        {
-            if (potentialMove == move)
-            {
-                isValid = true;
-                break;
-            }
-        }
-        if (!isValid) return false;
+        if (find(moves.begin(), moves.end(), move) == moves.end()) return false;
 
         if (!isWhite(pieces[move.first])) fullMoveCounter++;
         halfMoveClock++;
         if (pieces[move.second] != 0 || pieces[move.first] == 'p' || pieces[move.first] == 'P') halfMoveClock = 0;
 
-        if (pieces[move.first] == 'P' && pieces[move.second] == 0 && (move.first + 7 == pieces[move.second] || move.first + 9 == move.second))
-            pieces[enPassantTargetSquare] = 0;
-        if (pieces[move.first] == 'p' && pieces[move.second] == 0 && (move.first - 7 == move.second || move.first - 9 == move.second))
-            pieces[enPassantTargetSquare] = 0;
-
+        if (pieces[move.first] == 'P' && pieces[move.second] == 0 && (move.first + 7 == move.second || move.first + 9 == move.second)) pieces[enPassantTargetSquare] = 0;
+        else if (pieces[move.first] == 'p' && pieces[move.second] == 0 && (move.first - 7 == move.second || move.first - 9 == move.second)) pieces[enPassantTargetSquare] = 0;
         enPassantTargetSquare = -1;
         if (pieces[move.first] == 'P' && move.second == move.first + 16) enPassantTargetSquare = move.second;
         else if (pieces[move.first] == 'p' && move.second == move.first - 16) enPassantTargetSquare = move.second;
 
-        pieces[move.second] = pieces[move.first];
-        pieces[move.first] = 0;
-        isWhiteTurn = !isWhiteTurn;
+        if (pieces[4] == 'K' && move == make_pair(4, 2))
+        {
+            pieces[0] = 0;
+            pieces[3] = 'R';
+        }
+        else if (pieces[4] == 'K' && move == make_pair(4, 6))
+        {
+            pieces[7] = 0;
+            pieces[5] = 'R';
+        }
+        else if (pieces[60] == 'k' && move == make_pair(60, 58))
+        {
+            pieces[56] = 0;
+            pieces[59] = 'r';
+        }
+        else if (pieces[60] == 'k' && move == make_pair(60, 62))
+        {
+            pieces[63] = 0;
+            pieces[61] = 'r';
+        }
 
+        if (pieces[move.first] == 'K') canWhiteCastleKingside = false, canWhiteCastleQueenside = false;
+        else if (pieces[move.first] == 'k') canBlackCastleKingside = false, canBlackCastleQueenside = false;
+        else if (move.first == 0) canWhiteCastleQueenside = false;
+        else if (move.first == 7) canWhiteCastleKingside = false;
+        else if (move.first == 56) canBlackCastleQueenside = false;
+        else if (move.first == 63) canBlackCastleKingside = false;
+
+        if (move.second / 8 >= 7 && pieces[move.first] == 'P') pieces[56 + move.second % 8] = 'Q';
+        else if (move.second / 8 <= 0 && pieces[move.first] == 'p') pieces[move.second % 8] = 'q';
+        else pieces[move.second] = pieces[move.first];
+        pieces[move.first] = 0;
+
+        isWhiteTurn = !isWhiteTurn;
         return true;
     }
 };
