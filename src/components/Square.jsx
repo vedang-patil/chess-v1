@@ -9,8 +9,8 @@ function Square({ index, pieceLetter }) {
 
     const classes = [
         Math.floor(index / 8) % 2 == (index % 8) % 2
-            ? "whiteSquare"
-            : "blackSquare",
+            ? "blackSquare"
+            : "whiteSquare",
         isOver ? "hoverSquare" : undefined,
     ];
 
